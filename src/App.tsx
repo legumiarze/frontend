@@ -11,8 +11,8 @@ import theme from "./themes/theme";
 function App() {
     return (
         <ThemeProvider theme={theme}>
+            <ResponsiveNavbar/>
             <div className="App">
-                <ResponsiveNavbar/>
                 <BrowserRouter>
                     <Routes>
                         <Route path="/home" element={<Home/>}/>

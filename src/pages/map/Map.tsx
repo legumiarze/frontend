@@ -1,9 +1,10 @@
+import RouteSelector from "../../components/route-selector/RouteSelector";
 
 
 const Map = () => {
     return (
         <div>
-            <h1>Map</h1>
+            <RouteSelector />
         </div>
     );
 }
