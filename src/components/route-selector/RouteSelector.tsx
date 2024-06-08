@@ -10,6 +10,7 @@ import MapWithImageOverlay from "../map-with-overlay/MapWithOverlay";
 import ActivableButton from "../activable-button/ActivableButton";
 import colores from "../../themes/colores";
 import {RouteButton} from "../route-button/RouteButton";
+import {Stop} from "../../api/interfaces/sample";
 
 
 const drawerWidth = "40%";
@@ -39,9 +40,11 @@ const SearchBar = styled(Paper)(({theme}) => ({
     backgroundColor: '#FFFFFF',
 }));
 
+interface RouteSelectorProps {
+    data: Stop[];
+}
 
-
-const RouteSelector: React.FC = (props) => {
+const RouteSelector: React.FC<RouteSelectorProps> = ({data}) => {
     const theme = useTheme();
     const [isBusState, setBusState] = useState(true);
 
@@ -140,7 +143,7 @@ const RouteSelector: React.FC = (props) => {
         <Container>
             {sidebarContent}
             <Content>
-                <MapWithImageOverlay />
+                <MapWithImageOverlay data={data} />
             </Content>
         </Container>
     );

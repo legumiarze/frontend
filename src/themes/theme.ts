@@ -35,13 +35,6 @@ const theme = createTheme({
                 },
             },
         },
-        MuiToolbar: {
-            styleOverrides: {
-                root: {
-                    justifyContent: 'space-between',
-                },
-            },
-        },
         MuiDrawer: {
             styleOverrides: {
                 paper: {

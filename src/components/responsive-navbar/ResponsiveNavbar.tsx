@@ -11,6 +11,7 @@ import ListItemText from '@mui/material/ListItemText';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { Image } from 'mui-image';
 
 const ResponsiveNavbar: React.FC = (props) => {
     const [drawerOpen, setDrawerOpen] = React.useState(false);
@@ -71,12 +72,10 @@ const ResponsiveNavbar: React.FC = (props) => {
                             <MenuIcon />
                         </IconButton>
                     )}
-                    <Typography variant="h6" style={{ flexGrow: 1, textAlign: 'center' }}>
-                        Koleje Małopolskie
-                    </Typography>
+                    <Image src={"/images/koleje-malopolskie-logo.png"} style={{ width: '200px' }} />
                     {!isMobile && (
-                        <div style={{ display: 'flex', justifyContent: 'center', flexGrow: 1 }}>
-                            {menuItems.map((item) => (
+                        // <div style={{ display: 'flex', flexGrow: 1, justifyContent: 'center' }}>
+                            menuItems.map((item) => (
                                 <Typography
                                     variant="button"
                                     style={{ margin: '0 10px' }}
@@ -84,8 +83,8 @@ const ResponsiveNavbar: React.FC = (props) => {
                                 >
                                     {item}
                                 </Typography>
-                            ))}
-                        </div>
+                            ))
+                        // </div>
                     )}
                 </Toolbar>
             </AppBar>
