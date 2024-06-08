@@ -60,8 +60,9 @@ const ResponsiveNavbar: React.FC = (props) => {
         <div>
             <CssBaseline />
             <AppBar position="static">
-                <Toolbar style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    {isMobile && (
+                <Toolbar style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <img src={"/images/koleje-malopolskie-logo.png"} style={{ width: '200px', marginLeft: "5%" }} />
+                    {isMobile ? (
                         <IconButton
                             edge="start"
                             color="inherit"
@@ -71,20 +72,18 @@ const ResponsiveNavbar: React.FC = (props) => {
                         >
                             <MenuIcon />
                         </IconButton>
-                    )}
-                    <Image src={"/images/koleje-malopolskie-logo.png"} style={{ width: '200px' }} />
-                    {!isMobile && (
-                        // <div style={{ display: 'flex', flexGrow: 1, justifyContent: 'center' }}>
-                            menuItems.map((item) => (
+                    ) : (
+                        <div style={{ display: 'flex', flexGrow: 1, justifyContent: 'center' }}>
+                            {menuItems.map((item) => (
                                 <Typography
                                     variant="button"
-                                    style={{ margin: '0 10px' }}
+                                    style={{ margin: '0 20px' }}
                                     key={item}
                                 >
                                     {item}
                                 </Typography>
-                            ))
-                        // </div>
+                            ))}
+                        </div>
                     )}
                 </Toolbar>
             </AppBar>

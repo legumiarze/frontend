@@ -11,8 +11,14 @@ const Map = () => {
     useEffect(() => {
         const getData = async () => {
             try {
-                const result = await fetchData();
-                setData(result);
+                // const result = await fetchData({
+                //     neLat: mapCoords._ne.lat,
+                //     neLon: mapCoords._ne.lng,
+                //     swLat: mapCoords._sw.lat,
+                //     swLon: mapCoords._sw.lng
+                // });
+
+                // setData(result);
             } catch (error) {
                 console.error('Failed to fetch data:', error);
             }

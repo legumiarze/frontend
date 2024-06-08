@@ -1,10 +1,9 @@
 import axiosClient from "./axiosConfig";
 
 
-const fetchData = async () => {
+const fetchData = async (p: { swLat: number; neLat: number; neLon: number; swLon: number }) => {
     try {
-        const response = await axiosClient.get('/stops');
-        console.log(response.data.data);
+        const response = await axiosClient.get('/stops', { params: p });
         return response.data.data;
     } catch (error) {
         console.error('Error fetching data:', error);

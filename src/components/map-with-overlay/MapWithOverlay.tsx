@@ -1,7 +1,8 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import {mockRounds, Stop} from "../../api/interfaces/sample";
+import fetchData from "../../api/clients/trip-client";
 
 mapboxgl.accessToken =  process.env.REACT_APP_MAPBOX_ACCESS_TOKEN!;
 
@@ -12,6 +13,19 @@ interface MapWithImageOverlayProps {
 const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({data}) => {
     const mapContainer = useRef<HTMLDivElement | null>(null);
     const map = useRef<mapboxgl.Map | null>(null);
+    const [myData, setData] = useState<Stop[]>([]);
+    const markers = useRef<mapboxgl.Marker[]>([]);
+
+    const getData = async () => {
+        try {
+            let mapCoords = map.current!.getBounds();
+            const result = await fetchData({neLat: mapCoords._ne.lat, neLon: mapCoords._ne.lng, swLat: mapCoords._sw.lat, swLon: mapCoords._sw.lng});
+            setData(result);
+            addMarkers();
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+        }
+    };
 
     useEffect(() => {
         if (map.current) return;
@@ -24,6 +38,7 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({data}) => {
         });
 
         map.current.on('load', () => {
+            map.current!.on('moveend', () => handleZoom());
             // console.log(data)
 
             // mockRounds.forEach((round, index) => {
@@ -86,27 +101,72 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({data}) => {
     }, []);
 
     useEffect(() => {
-        console.log(data)
+        addMarkers();
+        console.log(myData)
+    }, [myData]);
 
-        data.forEach(stop => {
+
+    const handleZoom = () => {
+        const zoomLevel = map.current!.getZoom();
+        const zoomThreshold = 10;
+
+
+        if (zoomLevel >= zoomThreshold) {
+            getData();
+        } else {
+            removeMarkers();
+        }
+    };
+
+    useEffect(() => {
+
+        // data.forEach(stop => {
+        //     const el = document.createElement('div');
+        //     el.className = 'marker';
+        //
+        //     el.style.backgroundImage = 'url(/images/tmp-icon.png)';
+        //
+        //     el.style.width = '32px';
+        //     el.style.height = '32px';
+        //     el.style.backgroundSize = '100%';
+        //
+        //     new mapboxgl.Marker(el)
+        //         .setLngLat([stop.lon, stop.lat])
+        //         .setPopup(
+        //             new mapboxgl.Popup({offset: 25}).setHTML('<h3>' + stop.name + '</h3>')
+        //         )
+        //         .addTo(map.current!);
+        // });
+    }, [data]);
+
+    const addMarkers = () => {
+        removeMarkers();
+        data.forEach((stop) => {
             const el = document.createElement('div');
             el.className = 'marker';
 
             el.style.backgroundImage = 'url(/images/tmp-icon.png)';
-
             el.style.width = '32px';
             el.style.height = '32px';
             el.style.backgroundSize = '100%';
 
-            new mapboxgl.Marker(el)
+            const marker = new mapboxgl.Marker(el)
                 .setLngLat([stop.lon, stop.lat])
                 .setPopup(
-                    new mapboxgl.Popup({offset: 25}).setHTML('<h3>' + stop.name + '</h3>')
+                    new mapboxgl.Popup({ offset: 25 }).setHTML(
+                        ``
+                    )
                 )
                 .addTo(map.current!);
-        });
-    }, [data]);
 
+            markers.current.push(marker);
+        });
+    };
+
+    const removeMarkers = () => {
+        markers.current.forEach((marker) => marker.remove());
+        markers.current = [];
+    };
 
     return (
         <div style={{height: '90vh'}}>
