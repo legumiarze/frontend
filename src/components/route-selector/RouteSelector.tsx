@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
     AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemText,
     CssBaseline, useMediaQuery, Button, TextField, Box, Paper
@@ -7,6 +7,9 @@ import {useTheme, styled} from '@mui/material/styles';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import TrainIcon from '@mui/icons-material/Train';
 import MapWithImageOverlay from "../map-with-overlay/MapWithOverlay";
+import ActivableButton from "../activable-button/ActivableButton";
+import colores from "../../themes/colores";
+
 
 const drawerWidth = "40%";
 
@@ -49,7 +52,7 @@ const RouteButton = styled(Button)(({theme}) => ({
 
 const RouteSelector: React.FC = (props) => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const [isBusState, setBusState] = useState(true);
 
     const menuItems: string[] = [
         'A1 Kraków - Mogilany - Myślenice',
@@ -69,13 +72,59 @@ const RouteSelector: React.FC = (props) => {
                     fullWidth
                 />
             </SearchBar>
-            <Box display="flex" justifyContent="space-between" mb={2}>
-                <Button variant="outlined" color="inherit" startIcon={<DirectionsBusIcon/>} fullWidth>
-                    Autobusy
-                </Button>
-                <Button variant="contained" color="primary" startIcon={<TrainIcon/>} fullWidth>
-                    Pociągi
-                </Button>
+            <Box display="flex"
+                 justifyContent="space-between"
+                 mb={2}
+                 sx={{
+                     '&:hover': {bgcolor: colores.shadowedActiveBg}
+                 }}
+            >
+                {isBusState ? (
+                    <>
+                        <ActivableButton
+                            variant="outlined"
+                            color="primary"
+                            text="Autobusy"
+                            bgcolor='white'
+                            icon={<DirectionsBusIcon/>}
+                            hoverBgcolor='white'
+                            hoverTextColor='primary'
+                            click={() => setBusState(true)}
+                        />
+                        <ActivableButton
+                            variant="contained"
+                            color="primary"
+                            text="Pociągi"
+                            bgcolor={colores.primaryBgColor}
+                            icon={<TrainIcon/>}
+                            hoverBgcolor='white'
+                            hoverTextColor={colores.primaryBgColor}
+                            click={() => setBusState(false)}
+                        />
+                    </>
+                ) : (<>
+                    <ActivableButton
+                        variant="contained"
+                        color="primary"
+                        text="Autobusy"
+                        bgcolor={colores.primaryBgColor}
+                        icon={<DirectionsBusIcon/>}
+                        hoverBgcolor='white'
+                        hoverTextColor={colores.primaryBgColor}
+                        click={() => setBusState(true)}
+                    />
+                    <ActivableButton
+                        variant="outlined"
+                        color="primary"
+                        text="Pociągi"
+                        bgcolor='white'
+                        icon={<TrainIcon/>}
+                        hoverBgcolor='white'
+                        hoverTextColor='primary'
+                        click={() => setBusState(false)}
+                    />
+                </>)
+                }
             </Box>
             <List>
                 {menuItems.map((text) => (
@@ -92,7 +141,7 @@ const RouteSelector: React.FC = (props) => {
         <Container>
             {sidebarContent}
             <Content>
-                <MapWithImageOverlay />
+                {/*<MapWithImageOverlay />*/}
             </Content>
         </Container>
     );
