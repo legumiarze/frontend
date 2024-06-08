@@ -9,7 +9,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import {useTheme} from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
 const ResponsiveNavbar: React.FC = () => {
@@ -29,7 +29,8 @@ const ResponsiveNavbar: React.FC = () => {
             setDrawerOpen(open);
         };
 
-    const menuItems: string[] = ['AKTUALNOŚCI',
+    const menuItems: string[] = [
+        'AKTUALNOŚCI',
         'ROZKŁAD JAZDY',
         'DLA PASAŻERA',
         'O SPÓŁCE',
@@ -46,8 +47,8 @@ const ResponsiveNavbar: React.FC = () => {
         >
             <List>
                 {menuItems.map((text) => (
-                    <ListItem button key={text}>
-                        <ListItemText primary={text}/>
+                    <ListItem button key={text} style={{ justifyContent: 'center' }}>
+                        <ListItemText primary={text} />
                     </ListItem>
                 ))}
             </List>
@@ -56,28 +57,29 @@ const ResponsiveNavbar: React.FC = () => {
 
     return (
         <div>
-            <CssBaseline/>
+            <CssBaseline />
             <AppBar position="static">
-                <Toolbar>
+                <Toolbar style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     {isMobile && (
                         <IconButton
                             edge="start"
                             color="inherit"
                             aria-label="menu"
                             onClick={toggleDrawer(true)}
+                            style={{ marginRight: theme.spacing(2) }}
                         >
-                            <MenuIcon/>
+                            <MenuIcon />
                         </IconButton>
                     )}
-                    <Typography variant="h6" style={{flexGrow: 1}}>
-                        My App
+                    <Typography variant="h6" style={{ flexGrow: 1, textAlign: 'center' }}>
+                        Koleje Małopolskie
                     </Typography>
                     {!isMobile && (
-                        <div>
+                        <div style={{ display: 'flex', justifyContent: 'center', flexGrow: 1 }}>
                             {menuItems.map((item) => (
                                 <Typography
                                     variant="button"
-                                    style={{margin: '0 10px'}}
+                                    style={{ margin: '0 10px' }}
                                     key={item}
                                 >
                                     {item}
