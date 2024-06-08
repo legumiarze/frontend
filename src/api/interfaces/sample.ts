@@ -1,22 +1,24 @@
-export interface Round {
-    name: string;
-    meanOfTransport: 'bus' | 'train';
-    distance: number | null;
-    stations: Stop[];
+export interface Route {
+    routeColor: string,
+    routeTextColor: string,
+    routeShortName: string,
+    routeId: string,
+    routeType: number, // 3 -> autobusy, 2 -> pociagi
+    routeLongName: string
 }
 
 export interface Stop {
     stopName: string;
     stopLat: number;
     stopLon: number;
-    stopId: number;
+    stopId: string;
     departures: Departure[];
     trips: Trip[];
 }
 
 export interface Trip {
-    tripId: number;
-    serviceId: number;
+    tripId: string;
+    serviceId: string;
     stops: Stop[];
 }
 

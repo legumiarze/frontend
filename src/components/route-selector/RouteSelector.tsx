@@ -10,16 +10,12 @@ import MapWithImageOverlay from "../map-with-overlay/MapWithOverlay";
 import ActivableButton from "../activable-button/ActivableButton";
 import colores from "../../themes/colores";
 import {RouteButton} from "../route-button/RouteButton";
-import {Stop} from "../../api/interfaces/sample";
+import {Route} from "../../api/interfaces/sample";
 
-
-const Container = styled(Box)(({theme}) => ({
-    display: 'flex',
-    height: '92.5vh',
-}));
 
 const Sidebar = styled(Box)(({theme}) => ({
     width: '40%',
+    height: "93vh",
     backgroundColor: '#1A237E',
     padding: theme.spacing(2),
     color: '#FFFFFF'
@@ -33,11 +29,6 @@ const MobileSidebar = styled(Box)(({theme}) => ({
     color: '#FFFFFF'
 }));
 
-const Content = styled(Box)(({theme}) => ({
-    flexGrow: 1,
-    padding: theme.spacing(2)
-}));
-
 const SearchBar = styled(Paper)(({theme}) => ({
     padding: theme.spacing(2),
     display: 'flex',
@@ -46,24 +37,26 @@ const SearchBar = styled(Paper)(({theme}) => ({
     backgroundColor: '#FFFFFF',
 }));
 
-const RouteSelector: React.FC = (aa: any) => {
+const ScrollableList = styled(Box)(({ theme }) => ({
+    overflowY: 'auto',
+    maxHeight: '65vh',
+    paddingRight: "15px"
+}));
+
+interface RouteSelectorProps {
+    routes: Route[];
+}
+
+const RouteSelector: React.FC<RouteSelectorProps> = ({routes}) => {
     const theme = useTheme();
     const [isBusState, setBusState] = useState(true);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+
     const toggleDrawer = () => {
         setDrawerOpen(!drawerOpen);
     };
-
-    const menuItems: string[] = [
-        'A1 Kraków - Mogilany - Myślenice',
-        'A2 Wieliczka - Myślenice',
-        'A3 Bochnia - Limanowa',
-        'A4 Bochnia - Szczurowa',
-        'A5 Brzesko - Wietrzychowice',
-        'A6 Wieliczka - Łapanów',
-    ];
 
     const sidebarContent = (
         <Sidebar>
@@ -128,22 +121,22 @@ const RouteSelector: React.FC = (aa: any) => {
                 </>)
                 }
             </Box>
-            <List>
-                {isBusState ?
-                    (
-                        menuItems.map((text) => (
-                            <RouteButton key={text}>
-                                <DirectionsBusIcon style={{marginRight: theme.spacing(1)}}/>
-                                <ListItemText primary={text}/>
-                            </RouteButton>
-                        ))) : (
-                        menuItems.map((text) => (
-                            <RouteButton key={text}>
-                                <TrainIcon style={{marginRight: theme.spacing(1)}}/>
-                                <ListItemText primary={text}/>
-                            </RouteButton>
-                        )))}
-            </List>
+            <ScrollableList>
+                <List>
+                    {routes.map((route) =>
+                        <RouteButton key={route.routeId}>
+                            <DirectionsBusIcon style={{marginRight: theme.spacing(1)}}/>
+                            <ListItemText
+                                primary={
+                                    <Typography textAlign='left'>
+                                        {route.routeShortName + " " + route.routeLongName}
+                                    </Typography>
+                                }
+                            />
+                        </RouteButton>)
+                    }
+                </List>
+            </ScrollableList>
         </Sidebar>
     );
 
@@ -210,28 +203,27 @@ const RouteSelector: React.FC = (aa: any) => {
                 </>)
                 }
             </Box>
-            <List>
-                {isBusState ?
-                    (
-                        menuItems.map((text) => (
-                            <RouteButton key={text}>
-                                <DirectionsBusIcon style={{marginRight: theme.spacing(1)}}/>
-                                <ListItemText primary={text}/>
-                            </RouteButton>
-                        ))) : (
-                        menuItems.map((text) => (
-                            <RouteButton key={text}>
-                                <TrainIcon style={{marginRight: theme.spacing(1)}}/>
-                                <ListItemText primary={text}/>
-                            </RouteButton>
-                        )))}
-            </List>
+            <ScrollableList>
+                <List>
+                    {routes.map((route) =>
+                        <RouteButton key={route.routeId}>
+                            <DirectionsBusIcon style={{marginRight: theme.spacing(1)}}/>
+                            <ListItemText
+                                primary={
+                                    <Typography textAlign='left'>
+                                        {route.routeShortName + " " + route.routeLongName}
+                                    </Typography>
+                                }
+                            />
+                        </RouteButton>)
+                    }
+                </List>
+            </ScrollableList>
         </MobileSidebar>
     );
 
     const renderSidebar = () => {
         if (!isMobile) return sidebarContent;
-
 
         return <Drawer
             variant="persistent"
@@ -251,31 +243,7 @@ const RouteSelector: React.FC = (aa: any) => {
         </Drawer>
     };
 
-    return (
-        <Container>
-            <CssBaseline/>
-            {renderSidebar()}
-
-            <Content>
-                {isMobile ? (<Button
-                    variant="contained"
-                    color="primary"
-                    onClick={toggleDrawer}
-                    sx={{
-                        position: 'fixed',
-                        top: '50%',
-                        left: drawerOpen ? `calc(58% + 16px)` : '16px',
-                        transform: 'translateY(-50%)',
-                        zIndex: 1300,
-                    }}
-                >
-                    {drawerOpen ? '<' : '>'}
-                </Button>) : <></>}
-
-                <MapWithImageOverlay/>
-            </Content>
-        </Container>
-    );
+    return renderSidebar();
 }
 
 export default RouteSelector;
