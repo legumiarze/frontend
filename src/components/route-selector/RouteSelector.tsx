@@ -10,7 +10,7 @@ import MapWithImageOverlay from "../map-with-overlay/MapWithOverlay";
 import ActivableButton from "../activable-button/ActivableButton";
 import colores from "../../themes/colores";
 import {RouteButton} from "../route-button/RouteButton";
-import {Route} from "../../api/interfaces/sample";
+import {Route, Stop} from "../../api/interfaces/apiModels";
 
 
 const Sidebar = styled(Box)(({theme}) => ({
@@ -37,7 +37,7 @@ const SearchBar = styled(Paper)(({theme}) => ({
     backgroundColor: '#FFFFFF',
 }));
 
-const ScrollableList = styled(Box)(({ theme }) => ({
+const ScrollableList = styled(Box)(({theme}) => ({
     overflowY: 'auto',
     maxHeight: '65vh',
     paddingRight: "15px"
@@ -45,9 +45,11 @@ const ScrollableList = styled(Box)(({ theme }) => ({
 
 interface RouteSelectorProps {
     routes: Route[];
+    onStopAdd: (stop: Stop) => void;
+    stops: Stop[];
 }
 
-const RouteSelector: React.FC<RouteSelectorProps> = ({routes}) => {
+const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops}) => {
     const theme = useTheme();
     const [isBusState, setBusState] = useState(true);
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -58,6 +60,33 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes}) => {
         setDrawerOpen(!drawerOpen);
     };
 
+    const renderList = () => {
+        let tmpRoutes = routes;
+
+        if (stops.length > 0) {
+            let presentRouteIds = stops.flatMap(stop => stop.trips)
+                .flatMap(trip => trip.route)
+                .flatMap(route => route.routeId);
+
+            tmpRoutes = routes.filter(route => presentRouteIds.some(routeId => routeId === route.routeId));
+        }
+
+        return <List>
+            {tmpRoutes.map((route) =>
+                <RouteButton key={route.routeId}>
+                    <DirectionsBusIcon style={{marginRight: theme.spacing(1)}}/>
+                    <ListItemText
+                        primary={
+                            <Typography textAlign='left'>
+                                {route.routeShortName + " " + route.routeLongName}
+                            </Typography>
+                        }
+                    />
+                </RouteButton>)
+            }
+        </List>
+    }
+
     const sidebarContent = (
         <Sidebar>
             <SearchBar>
@@ -67,75 +96,63 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes}) => {
                     fullWidth
                 />
             </SearchBar>
-            <Box display="flex"
-                 justifyContent="space-between"
-                 mb={2}
-                 sx={{
-                     '&:hover': {bgcolor: colores.shadowedActiveBg}
-                 }}
-            >
-                {isBusState ? (
-                    <>
-                        <ActivableButton
-                            variant="outlined"
-                            color="primary"
-                            text="Autobusy"
-                            bgcolor='white'
-                            icon={<DirectionsBusIcon/>}
-                            hoverBgcolor='white'
-                            hoverTextColor='primary'
-                            click={() => setBusState(true)}
-                        />
+            {stops.length <= 0 &&
+                <Box display="flex"
+                     justifyContent="space-between"
+                     mb={2}
+                     sx={{
+                         '&:hover': {bgcolor: colores.shadowedActiveBg}
+                     }}
+                >
+                    {isBusState ? (
+                        <>
+                            <ActivableButton
+                                variant="outlined"
+                                color="primary"
+                                text="Autobusy"
+                                bgcolor='white'
+                                icon={<DirectionsBusIcon/>}
+                                hoverBgcolor='white'
+                                hoverTextColor='primary'
+                                click={() => setBusState(true)}
+                            />
+                            <ActivableButton
+                                variant="contained"
+                                color="primary"
+                                text="Pociągi"
+                                bgcolor={colores.primaryBgColor}
+                                icon={<TrainIcon/>}
+                                hoverBgcolor='white'
+                                hoverTextColor={colores.primaryBgColor}
+                                click={() => setBusState(false)}
+                            />
+                        </>
+                    ) : (<>
                         <ActivableButton
                             variant="contained"
                             color="primary"
-                            text="Pociągi"
+                            text="Autobusy"
                             bgcolor={colores.primaryBgColor}
-                            icon={<TrainIcon/>}
+                            icon={<DirectionsBusIcon/>}
                             hoverBgcolor='white'
                             hoverTextColor={colores.primaryBgColor}
+                            click={() => setBusState(true)}
+                        />
+                        <ActivableButton
+                            variant="outlined"
+                            color="primary"
+                            text="Pociągi"
+                            bgcolor='white'
+                            icon={<TrainIcon/>}
+                            hoverBgcolor='white'
+                            hoverTextColor='primary'
                             click={() => setBusState(false)}
                         />
-                    </>
-                ) : (<>
-                    <ActivableButton
-                        variant="contained"
-                        color="primary"
-                        text="Autobusy"
-                        bgcolor={colores.primaryBgColor}
-                        icon={<DirectionsBusIcon/>}
-                        hoverBgcolor='white'
-                        hoverTextColor={colores.primaryBgColor}
-                        click={() => setBusState(true)}
-                    />
-                    <ActivableButton
-                        variant="outlined"
-                        color="primary"
-                        text="Pociągi"
-                        bgcolor='white'
-                        icon={<TrainIcon/>}
-                        hoverBgcolor='white'
-                        hoverTextColor='primary'
-                        click={() => setBusState(false)}
-                    />
-                </>)
-                }
-            </Box>
-            <ScrollableList>
-                <List>
-                    {routes.map((route) =>
-                        <RouteButton key={route.routeId}>
-                            <DirectionsBusIcon style={{marginRight: theme.spacing(1)}}/>
-                            <ListItemText
-                                primary={
-                                    <Typography textAlign='left'>
-                                        {route.routeShortName + " " + route.routeLongName}
-                                    </Typography>
-                                }
-                            />
-                        </RouteButton>)
+                    </>)
                     }
-                </List>
+                </Box>}
+            <ScrollableList>
+                {renderList()}
             </ScrollableList>
         </Sidebar>
     );

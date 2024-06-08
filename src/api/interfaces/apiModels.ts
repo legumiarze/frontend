@@ -20,6 +20,7 @@ export interface Trip {
     tripId: string;
     serviceId: string;
     stops: Stop[];
+    route: Route
 }
 
 export interface Departure {

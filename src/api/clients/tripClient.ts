@@ -1,5 +1,5 @@
 import axiosClient from "./axiosConfig";
-import {Route, Stop} from "../interfaces/sample";
+import {Route, Stop} from "../interfaces/apiModels";
 
 
 const fetchStopsByLocation = async (p: { swLat: number; neLat: number; neLon: number; swLon: number }) => {
@@ -15,7 +15,6 @@ const fetchStopsByLocation = async (p: { swLat: number; neLat: number; neLon: nu
 const fetchStopDetailsById = async (id: string): Promise<Stop> => {
     try {
         const response = await axiosClient.get(`/stops/${id}`);
-        console.log(response.data)
         return response.data;
     } catch (error) {
         console.error('Error fetching data:', error);

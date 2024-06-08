@@ -1,17 +1,23 @@
 import React, {useEffect, useRef, useState} from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import {Stop} from "../../api/interfaces/sample";
+import {Stop} from "../../api/interfaces/apiModels";
 import {fetchStopDetailsById, fetchStopsByLocation} from "../../api/clients/tripClient";
 
-mapboxgl.accessToken =  process.env.REACT_APP_MAPBOX_ACCESS_TOKEN!;
+mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN!;
 
-const MapWithImageOverlay: React.FC = () => {
+interface MapWithImageOverlayProps {
+    stops: Stop[];
+    onStopAdd: (stop: Stop) => void;
+}
+
+const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({stops, onStopAdd}) => {
     const mapContainer = useRef<HTMLDivElement | null>(null);
     const map = useRef<mapboxgl.Map | null>(null);
     const [myData, setData] = useState<Stop[]>([]);
     const markers = useRef<mapboxgl.Marker[]>([]);
     const [isStopFocused, setIsStopFocused] = useState(false);
+
 
     const getData = async () => {
         try {
@@ -23,7 +29,7 @@ const MapWithImageOverlay: React.FC = () => {
                 swLon: mapCoords._sw.lng
             });
             setData(result);
-            addMarkers();
+            updateMarkers();
         } catch (error) {
             console.error('Failed to fetch data:', error);
         }
@@ -45,13 +51,13 @@ const MapWithImageOverlay: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if(isStopFocused) return;
-        addMarkers();
+        updateMarkers();
     }, [myData]);
 
 
     const handleZoom = () => {
-        if(isStopFocused) return;
+        if (isStopFocused) return;
+
         const zoomLevel = map.current!.getZoom();
         const zoomThreshold = 10;
 
@@ -63,21 +69,20 @@ const MapWithImageOverlay: React.FC = () => {
         }
     };
 
-    const someFunction = async (stop: Stop) => {
+    const markerClick = async (stop: Stop) => {
         const result = await fetchStopDetailsById(stop.stopId);
         setData([result]);
         setIsStopFocused(true);
+        onStopAdd(result);
+        drawLine(result);
     }
 
     useEffect(() => {
         drawLines();
     }, [isStopFocused]);
 
-
-    const drawLines = () => {
-        if (myData.length !== 1) return;
-        addMarkers()
-        myData[0].trips.forEach((trip, index) => {
+    const drawLine = (stop: Stop) => {
+        stop.trips.forEach((trip, index) => {
             const coordinates = trip.stops.map(stop => [stop.stopLon, stop.stopLat]);
 
             map.current!.addSource(`route-${index}`, {
@@ -101,7 +106,7 @@ const MapWithImageOverlay: React.FC = () => {
                     'line-cap': 'round'
                 },
                 paint: {
-                    'line-color': '#FF0000',
+                    'line-color': `#${trip.route.routeColor}`,
                     'line-width': 4
                 }
             });
@@ -109,10 +114,26 @@ const MapWithImageOverlay: React.FC = () => {
         });
     }
 
-    const addMarkers = () => {
-        removeMarkers();
+    const drawLines = () => {
+        if (myData.length !== 1) return;
 
-        myData.forEach((stop) => {
+        updateMarkers()
+        drawLine(myData[0]);
+
+    }
+
+    const updateMarkers = () => {
+        removeMarkers();
+        addMarkers(myData);
+    }
+
+    const addMarkers = (data: Stop[]) => {
+        if(isStopFocused) {
+            let actualStopsInTrip: Stop[] = stops.flatMap(stop => stop.trips.flatMap(trip => trip.stops));
+            data = data.filter(stop => actualStopsInTrip.some(actualStop => actualStop.stopId === stop.stopId))
+        }
+
+        data.forEach((stop) => {
             const el = document.createElement('div');
             el.className = 'marker';
 
@@ -120,7 +141,7 @@ const MapWithImageOverlay: React.FC = () => {
             el.style.width = '32px';
             el.style.height = '32px';
             el.style.backgroundSize = '100%';
-            el.addEventListener('click', () => someFunction(stop));
+            el.addEventListener('click', () => markerClick(stop));
 
             const marker = new mapboxgl.Marker(el)
                 .setLngLat([stop.stopLon, stop.stopLat])
