@@ -85,6 +85,9 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({stops, onStopA
         stop.trips.forEach((trip, index) => {
             const coordinates = trip.stops.map(stop => [stop.stopLon, stop.stopLat]);
 
+            if(map.current!.getSource(`route-${index}`))
+                return;
+
             map.current!.addSource(`route-${index}`, {
                 type: 'geojson',
                 data: {
