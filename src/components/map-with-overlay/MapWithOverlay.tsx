@@ -11,6 +11,7 @@ const MapWithImageOverlay: React.FC = () => {
     const map = useRef<mapboxgl.Map | null>(null);
     const [myData, setData] = useState<Stop[]>([]);
     const markers = useRef<mapboxgl.Marker[]>([]);
+    const [isStopFocused, setIsStopFocused] = useState(false);
 
     const getData = async () => {
         try {
@@ -44,11 +45,13 @@ const MapWithImageOverlay: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        if(isStopFocused) return;
         addMarkers();
     }, [myData]);
 
 
     const handleZoom = () => {
+        if(isStopFocused) return;
         const zoomLevel = map.current!.getZoom();
         const zoomThreshold = 10;
 
@@ -63,12 +66,17 @@ const MapWithImageOverlay: React.FC = () => {
     const someFunction = async (stop: Stop) => {
         const result = await fetchStopDetailsById(stop.stopId);
         setData([result]);
-        drawLines();
+        setIsStopFocused(true);
     }
+
+    useEffect(() => {
+        drawLines();
+    }, [isStopFocused]);
+
 
     const drawLines = () => {
         if (myData.length !== 1) return;
-
+        addMarkers()
         myData[0].trips.forEach((trip, index) => {
             const coordinates = trip.stops.map(stop => [stop.stopLon, stop.stopLat]);
 
