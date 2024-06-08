@@ -13,7 +13,7 @@ import { useTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Image } from 'mui-image';
 
-const ResponsiveNavbar: React.FC = (props) => {
+const ResponsiveNavbar: React.FC = () => {
     const [drawerOpen, setDrawerOpen] = React.useState(false);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));

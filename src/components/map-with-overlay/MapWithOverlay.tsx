@@ -6,11 +6,7 @@ import fetchData from "../../api/clients/trip-client";
 
 mapboxgl.accessToken =  process.env.REACT_APP_MAPBOX_ACCESS_TOKEN!;
 
-interface MapWithImageOverlayProps {
-    data: Stop[];
-}
-
-const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({data}) => {
+const MapWithImageOverlay: React.FC = () => {
     const mapContainer = useRef<HTMLDivElement | null>(null);
     const map = useRef<mapboxgl.Map | null>(null);
     const [myData, setData] = useState<Stop[]>([]);
@@ -137,11 +133,11 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({data}) => {
         //         )
         //         .addTo(map.current!);
         // });
-    }, [data]);
+    }, []);
 
     const addMarkers = () => {
         removeMarkers();
-        data.forEach((stop) => {
+        myData.forEach((stop) => {
             const el = document.createElement('div');
             el.className = 'marker';
 
