@@ -9,6 +9,7 @@ import TrainIcon from '@mui/icons-material/Train';
 import MapWithImageOverlay from "../map-with-overlay/MapWithOverlay";
 import ActivableButton from "../activable-button/ActivableButton";
 import colores from "../../themes/colores";
+import {RouteButton} from "../route-button/RouteButton";
 
 
 const drawerWidth = "40%";
@@ -38,17 +39,7 @@ const SearchBar = styled(Paper)(({theme}) => ({
     backgroundColor: '#FFFFFF',
 }));
 
-const RouteButton = styled(Button)(({theme}) => ({
-    backgroundColor: '#FFFFFF',
-    color: '#1A237E',
-    margin: theme.spacing(1, 0),
-    textTransform: 'none',
-    justifyContent: 'flex-start',
-    padding: theme.spacing(2),
-    display: 'flex',
-    alignItems: 'center',
-    width: '100%',
-}));
+
 
 const RouteSelector: React.FC = (props) => {
     const theme = useTheme();
@@ -127,12 +118,20 @@ const RouteSelector: React.FC = (props) => {
                 }
             </Box>
             <List>
-                {menuItems.map((text) => (
-                    <RouteButton key={text}>
-                        <DirectionsBusIcon style={{marginRight: theme.spacing(1)}}/>
-                        <ListItemText primary={text}/>
-                    </RouteButton>
-                ))}
+                {isBusState ?
+                    (
+                        menuItems.map((text) => (
+                            <RouteButton key={text}>
+                                <DirectionsBusIcon style={{marginRight: theme.spacing(1)}}/>
+                                <ListItemText primary={text}/>
+                            </RouteButton>
+                    ))) : (
+                        menuItems.map((text) => (
+                            <RouteButton key={text}>
+                                <TrainIcon style={{marginRight: theme.spacing(1)}}/>
+                                <ListItemText primary={text}/>
+                            </RouteButton>
+                    )))}
             </List>
         </Sidebar>
     );
@@ -141,7 +140,7 @@ const RouteSelector: React.FC = (props) => {
         <Container>
             {sidebarContent}
             <Content>
-                {/*<MapWithImageOverlay />*/}
+                <MapWithImageOverlay />
             </Content>
         </Container>
     );

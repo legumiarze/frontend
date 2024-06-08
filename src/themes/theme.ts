@@ -42,21 +42,6 @@ const theme = createTheme({
                 },
             },
         },
-        MuiButton: {
-            styleOverrides: {
-                root: {
-                    borderRadius: 0,
-                    padding: '10px 20px',
-                },
-                containedPrimary: {
-                    backgroundColor: '#1A237E',
-                    color: '#FFFFFF',
-                    '&:hover': {
-                        backgroundColor: '#3949AB',
-                    },
-                },
-            },
-        },
         MuiDrawer: {
             styleOverrides: {
                 paper: {
