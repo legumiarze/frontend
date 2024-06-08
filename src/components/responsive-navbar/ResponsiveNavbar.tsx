@@ -9,9 +9,9 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
+import {useTheme} from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Image } from 'mui-image';
+import DropdownMenuItem from "../dropdown-menu-item/DropdownMenuItem";
 
 const ResponsiveNavbar: React.FC = () => {
     const [drawerOpen, setDrawerOpen] = React.useState(false);
@@ -30,16 +30,6 @@ const ResponsiveNavbar: React.FC = () => {
             setDrawerOpen(open);
         };
 
-    const menuItems: string[] = [
-        'AKTUALNOŚCI',
-        'ROZKŁAD JAZDY',
-        'DLA PASAŻERA',
-        'O SPÓŁCE',
-        'KONTAKT',
-        'REKLAMA',
-        'INWESTYCJE'
-    ];
-
     const drawer = (
         <div
             role="presentation"
@@ -47,42 +37,72 @@ const ResponsiveNavbar: React.FC = () => {
             onKeyDown={toggleDrawer(false)}
         >
             <List>
-                {menuItems.map((text) => (
-                    <ListItem button key={text} style={{ justifyContent: 'center' }}>
-                        <ListItemText primary={text} />
-                    </ListItem>
-                ))}
+                {/*{menuItems.map((text) => (*/}
+                {/*    <ListItem button key={text} style={{justifyContent: 'center'}}>*/}
+                {/*        <ListItemText primary={text}/>*/}
+                {/*    </ListItem>*/}
+                {/*))}*/}
             </List>
         </div>
     );
 
     return (
         <div>
-            <CssBaseline />
+            <CssBaseline/>
             <AppBar position="static">
-                <Toolbar style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <img src={"/images/koleje-malopolskie-logo.png"} style={{ width: '200px', marginLeft: "5%" }} />
+                <Toolbar style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                    <img src={"/images/koleje-malopolskie-logo.png"} style={{width: '200px', marginLeft: "5%"}}/>
                     {isMobile ? (
                         <IconButton
-                            edge="start"
+                            edge="end"
                             color="inherit"
                             aria-label="menu"
                             onClick={toggleDrawer(true)}
-                            style={{ marginRight: theme.spacing(2) }}
+                            style={{marginRight: theme.spacing(2)}}
                         >
-                            <MenuIcon />
+                            <MenuIcon/>
                         </IconButton>
                     ) : (
-                        <div style={{ display: 'flex', flexGrow: 1, justifyContent: 'center' }}>
-                            {menuItems.map((item) => (
-                                <Typography
-                                    variant="button"
-                                    style={{ margin: '0 20px' }}
-                                    key={item}
-                                >
-                                    {item}
-                                </Typography>
-                            ))}
+                        <div style={{display: 'flex', justifyContent: 'center', flexGrow: 1}}>
+                            <Typography
+                                variant="button"
+                                style={{margin: '0 20px'}}
+                            >
+                                AKTUALNOŚCI
+                            </Typography>
+
+                            <DropdownMenuItem label="ROZKŁAD JAZDY" items={['ROZKŁADY', 'MAPA']} />
+
+                            <Typography
+                                variant="button"
+                                style={{margin: '0 20px'}}
+                            >
+                                DLA PASAŻERA
+                            </Typography>
+                            <Typography
+                                variant="button"
+                                style={{margin: '0 20px'}}
+                            >
+                                O SPÓŁCE
+                            </Typography>
+                            <Typography
+                                variant="button"
+                                style={{margin: '0 20px'}}
+                            >
+                                KONTAKT
+                            </Typography>
+                            <Typography
+                                variant="button"
+                                style={{margin: '0 20px'}}
+                            >
+                                REKLAMA
+                            </Typography>
+                            <Typography
+                                variant="button"
+                                style={{margin: '0 20px'}}
+                            >
+                                INWESTYCJE
+                            </Typography>
                         </div>
                     )}
                 </Toolbar>

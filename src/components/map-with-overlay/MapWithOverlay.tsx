@@ -1,8 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import {mockRounds, Stop} from "../../api/interfaces/sample";
-import fetchData from "../../api/clients/trip-client";
+import {Stop} from "../../api/interfaces/sample";
+import {fetchStopDetailsById, fetchStopsByLocation} from "../../api/clients/tripClient";
 
 mapboxgl.accessToken =  process.env.REACT_APP_MAPBOX_ACCESS_TOKEN!;
 
@@ -15,7 +15,12 @@ const MapWithImageOverlay: React.FC = () => {
     const getData = async () => {
         try {
             let mapCoords = map.current!.getBounds();
-            const result = await fetchData({neLat: mapCoords._ne.lat, neLon: mapCoords._ne.lng, swLat: mapCoords._sw.lat, swLon: mapCoords._sw.lng});
+            const result = await fetchStopsByLocation({
+                neLat: mapCoords._ne.lat,
+                neLon: mapCoords._ne.lng,
+                swLat: mapCoords._sw.lat,
+                swLon: mapCoords._sw.lng
+            });
             setData(result);
             addMarkers();
         } catch (error) {
@@ -35,70 +40,11 @@ const MapWithImageOverlay: React.FC = () => {
 
         map.current.on('load', () => {
             map.current!.on('moveend', () => handleZoom());
-            // console.log(data)
-
-            // mockRounds.forEach((round, index) => {
-            //     const coordinates = round.stations.map(stop => [stop.lon, stop.lat]);
-            //
-            //     // Add a line layer for the route
-            //     map.current!.addSource(`route-${index}`, {
-            //         type: 'geojson',
-            //         data: {
-            //             type: 'Feature',
-            //             properties: {},
-            //             geometry: {
-            //                 type: 'LineString',
-            //                 coordinates: coordinates
-            //             }
-            //         }
-            //     });
-            //
-            //     map.current!.addLayer({
-            //         id: `route-${index}`,
-            //         type: 'line',
-            //         source: `route-${index}`,
-            //         layout: {
-            //             'line-join': 'round',
-            //             'line-cap': 'round'
-            //         },
-            //         paint: {
-            //             'line-color': round.meanOfTransport === 'bus' ? '#FF0000' : '#0000FF', // Red for bus, Blue for train
-            //             'line-width': 4
-            //         }
-            //     });
-            //
-            //     // Add markers for each stop in the round
-            //     round.stations.forEach(stop => {
-            //         const el = document.createElement('div');
-            //         el.className = 'marker';
-            //
-            //         // Set the icon based on the mean of transport
-            //         if (round.meanOfTransport === 'bus') {
-            //             el.style.backgroundImage = 'url(/images/tmp-icon.png)'; // Adjust the path to your bus icon
-            //         } else {
-            //             el.style.backgroundImage = 'url(/images/tmp-icon.png)'; // Adjust the path to your train icon
-            //         }
-            //
-            //         el.style.width = '32px';
-            //         el.style.height = '32px';
-            //         el.style.backgroundSize = '100%';
-            //
-            //         new mapboxgl.Marker(el)
-            //             .setLngLat([stop.lon, stop.lat])
-            //             .setPopup(
-            //                 new mapboxgl.Popup({ offset: 25 }).setHTML(
-            //                     `<h3>${stop.name}</h3><p>Departures:</p><ul>${stop.departures.map(departure => `<li>${departure.time.toLocaleTimeString()}</li>`).join('')}</ul>`
-            //                 )
-            //             )
-            //             .addTo(map.current!);
-            //     });
-            // });
         });
     }, []);
 
     useEffect(() => {
         addMarkers();
-        console.log(myData)
     }, [myData]);
 
 
@@ -114,29 +60,50 @@ const MapWithImageOverlay: React.FC = () => {
         }
     };
 
-    useEffect(() => {
+    const someFunction = async (stop: Stop) => {
+        const result = await fetchStopDetailsById(stop.stopId);
+        setData([result]);
+        drawLines();
+    }
 
-        // data.forEach(stop => {
-        //     const el = document.createElement('div');
-        //     el.className = 'marker';
-        //
-        //     el.style.backgroundImage = 'url(/images/tmp-icon.png)';
-        //
-        //     el.style.width = '32px';
-        //     el.style.height = '32px';
-        //     el.style.backgroundSize = '100%';
-        //
-        //     new mapboxgl.Marker(el)
-        //         .setLngLat([stop.lon, stop.lat])
-        //         .setPopup(
-        //             new mapboxgl.Popup({offset: 25}).setHTML('<h3>' + stop.name + '</h3>')
-        //         )
-        //         .addTo(map.current!);
-        // });
-    }, []);
+    const drawLines = () => {
+        if (myData.length !== 1) return;
+
+        myData[0].trips.forEach((trip, index) => {
+            const coordinates = trip.stops.map(stop => [stop.stopLon, stop.stopLat]);
+
+            map.current!.addSource(`route-${index}`, {
+                type: 'geojson',
+                data: {
+                    type: 'Feature',
+                    properties: {},
+                    geometry: {
+                        type: 'LineString',
+                        coordinates: coordinates
+                    }
+                }
+            });
+
+            map.current!.addLayer({
+                id: `route-${index}`,
+                type: 'line',
+                source: `route-${index}`,
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': '#FF0000',
+                    'line-width': 4
+                }
+            });
+
+        });
+    }
 
     const addMarkers = () => {
         removeMarkers();
+
         myData.forEach((stop) => {
             const el = document.createElement('div');
             el.className = 'marker';
@@ -145,11 +112,12 @@ const MapWithImageOverlay: React.FC = () => {
             el.style.width = '32px';
             el.style.height = '32px';
             el.style.backgroundSize = '100%';
+            el.addEventListener('click', () => someFunction(stop));
 
             const marker = new mapboxgl.Marker(el)
-                .setLngLat([stop.lon, stop.lat])
+                .setLngLat([stop.stopLon, stop.stopLat])
                 .setPopup(
-                    new mapboxgl.Popup({ offset: 25 }).setHTML(
+                    new mapboxgl.Popup({offset: 25}).setHTML(
                         ``
                     )
                 )

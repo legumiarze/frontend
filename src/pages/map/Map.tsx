@@ -1,6 +1,6 @@
 import RouteSelector from "../../components/route-selector/RouteSelector";
 import {useEffect, useState} from "react";
-import fetchData from "../../api/clients/trip-client";
+import {fetchStopsByLocation} from "../../api/clients/tripClient";
 import {Stop} from "../../api/interfaces/sample";
 import {styled} from "@mui/material/styles";
 import {Box} from "@mui/material";
