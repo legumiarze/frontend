@@ -12,6 +12,14 @@ The main goal of the project was to create a platform that will help to standard
 
 ![](docs/partiall-demo-2.png)
 
+<h4 align="center">Responsive</h4>
+![img.png](docs/responsive-1.png)
+![img.png](docs/responsive-2.png)
+![img.png](docs/responsive-3.png)
+
+*NOTE* following patterns observed in the koleje malopolskie, animation, color palette,
+as well as the general layout of the page was copied with their consent.
+
 Features
 --------
 Our mail goal was to provide as detailed and accessible application as we can, that is why 
@@ -72,12 +80,6 @@ See:
 # Obtaining API Keys
 You will need to obtain appropriate credentials (Client ID, Client Secret, API Key, or Username & Password) for API and service provides which you need.  See Step 2 in the Getting started section for more info.
 
-
-Changelog
----------
-
-You can find the changelog for the project in: [CHANGELOG.md](https://github.com/sahat/hackathon-starter/blob/master/CHANGELOG.md)
-
 Business Logic
 --------------
 Our program is aimed to specific group which should resolve problems met in a given industry. More information about parsing 
@@ -102,3 +104,5 @@ Pull requests are always welcome, but due to the opinionated nature of this proj
 
 License
 -------
+
+It is to be done :smile:
