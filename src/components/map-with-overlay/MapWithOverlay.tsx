@@ -1,172 +1,117 @@
-import React, {useEffect, useRef, useState} from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import React, {useCallback, useEffect, useState} from 'react';
 import {Stop} from "../../api/interfaces/apiModels";
-import {fetchStopDetailsById, fetchStopsByLocation} from "../../api/clients/tripClient";
-
-mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN!;
+import {fetchStopDetailsById} from "../../api/clients/tripClient";
+import useMap from "../../hooks/useMap";
+import useMarkers from "../../hooks/useMarkers";
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 interface MapWithImageOverlayProps {
     stops: Stop[];
     onStopAdd: (stop: Stop) => void;
 }
 
-const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({stops, onStopAdd}) => {
-    const mapContainer = useRef<HTMLDivElement | null>(null);
-    const map = useRef<mapboxgl.Map | null>(null);
+const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({ stops, onStopAdd }) => {
     const [myData, setData] = useState<Stop[]>([]);
-    const markers = useRef<mapboxgl.Marker[]>([]);
-    const [isStopFocused, setIsStopFocused] = useState(false);
+    const { mapContainer, map, isStopFocused, setIsStopFocused, getData } = useMap(setData);
 
-
-    const getData = async () => {
-        try {
-            let mapCoords = map.current!.getBounds();
-            const result = await fetchStopsByLocation({
-                neLat: mapCoords._ne.lat,
-                neLon: mapCoords._ne.lng,
-                swLat: mapCoords._sw.lat,
-                swLon: mapCoords._sw.lng
-            });
-            setData(result);
-            updateMarkers();
-        } catch (error) {
-            console.error('Failed to fetch data:', error);
-        }
-    };
-
-    useEffect(() => {
-        if (map.current) return;
-
-        map.current = new mapboxgl.Map({
-            container: mapContainer.current!,
-            style: 'mapbox://styles/mapbox/streets-v11',
-            center: [19.9333, 50.0614],
-            zoom: 8
-        });
-
-        map.current.on('load', () => {
-            map.current!.on('moveend', () => handleZoom());
-        });
-    }, []);
-
-    useEffect(() => {
-        updateMarkers();
-    }, [myData]);
-
-
-    const handleZoom = () => {
-        if (isStopFocused) return;
-
-        const zoomLevel = map.current!.getZoom();
-        const zoomThreshold = 10;
-
-
-        if (zoomLevel >= zoomThreshold) {
-            getData();
-        } else {
-            removeMarkers();
-        }
-    };
-
-    const markerClick = async (stop: Stop) => {
+    const markerClick = useCallback(async (stop: Stop) => {
         const result = await fetchStopDetailsById(stop.stopId);
         setData([result]);
         setIsStopFocused(true);
         onStopAdd(result);
-        drawLine(result);
-    }
+        drawLines([result]);
+    }, [setIsStopFocused, setData, onStopAdd]);
 
-    useEffect(() => {
-        drawLines();
-    }, [isStopFocused]);
+    const markers = useMarkers(map.current, myData, markerClick, isStopFocused);
 
-    const drawLine = (stop: Stop) => {
-        stop.trips.forEach((trip, index) => {
-            const coordinates = trip.stops.map(stop => [stop.stopLon, stop.stopLat]);
+    const drawLines = useCallback((data: Stop[]) => {
+        data.forEach((stop) => {
+            stop.trips.forEach((trip, index) => {
+                const coordinates = trip.stops.map(stop => [stop.stopLon, stop.stopLat]);
 
-            if(map.current!.getSource(`route-${index}`))
+            if(map.current!.getSource(`route-${trip.tripId}`))
                 return;
 
-            map.current!.addSource(`route-${index}`, {
-                type: 'geojson',
-                data: {
-                    type: 'Feature',
-                    properties: {},
-                    geometry: {
-                        type: 'LineString',
-                        coordinates: coordinates
+                if (map.current!.getSource(`route-${trip.tripId}`)) {
+                    const source = map.current!.getSource(`route-${trip.tripId}`);
+                    if ((source as mapboxgl.GeoJSONSource).setData) {
+                        (source as mapboxgl.GeoJSONSource).setData({
+                            type: 'Feature',
+                            properties: {},
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: coordinates
+                            }
+                        });
                     }
+                } else {
+                    map.current!.addSource(`route-${trip.tripId}`, {
+                        type: 'geojson',
+                        data: {
+                            type: 'Feature',
+                            properties: {},
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: coordinates
+                            }
+                        }
+                    });
+
+                    map.current!.addLayer({
+                        id: `route-${trip.tripId}`,
+                        type: 'line',
+                        source: `route-${trip.tripId}`,
+                        layout: {
+                            'line-join': 'round',
+                            'line-cap': 'round'
+                        },
+                        paint: {
+                            'line-color': `#${trip.route.routeColor}`,
+                            'line-width': 4
+                        }
+                    });
                 }
             });
-
-            map.current!.addLayer({
-                id: `route-${index}`,
-                type: 'line',
-                source: `route-${index}`,
-                layout: {
-                    'line-join': 'round',
-                    'line-cap': 'round'
-                },
-                paint: {
-                    'line-color': `#${trip.route.routeColor}`,
-                    'line-width': 4
-                }
-            });
-
         });
-    }
+    }, [map]);
 
-    const drawLines = () => {
-        if (myData.length !== 1) return;
+    const handleZoomIn = () => {
+        if (map.current) {
+            map.current.zoomIn();
+        }
+    };
 
-        updateMarkers()
-        drawLine(myData[0]);
+    const handleZoomOut = () => {
+        if (map.current) {
+            map.current.zoomOut();
+        }
+    };
 
-    }
+    const toggleMarkers = () => {
+        markers.current.forEach(marker => {
+            marker.getElement().style.visibility = marker.getElement().style.visibility === 'visible' ? 'hidden' : 'visible';
+        });
+    };
 
-    const updateMarkers = () => {
-        removeMarkers();
-        addMarkers(myData);
-    }
-
-    const addMarkers = (data: Stop[]) => {
-        if(isStopFocused) {
-            let actualStopsInTrip: Stop[] = stops.flatMap(stop => stop.trips.flatMap(trip => trip.stops));
-            data = data.filter(stop => actualStopsInTrip.some(actualStop => actualStop.stopId === stop.stopId))
+    useEffect(() => {
+        if (map.current) {
+            map.current.on('moveend', getData);
         }
 
-        data.forEach((stop) => {
-            const el = document.createElement('div');
-            el.className = 'marker';
-
-            el.style.backgroundImage = 'url(/images/tmp-icon.png)';
-            el.style.width = '32px';
-            el.style.height = '32px';
-            el.style.backgroundSize = '100%';
-            el.addEventListener('click', () => markerClick(stop));
-
-            const marker = new mapboxgl.Marker(el)
-                .setLngLat([stop.stopLon, stop.stopLat])
-                .setPopup(
-                    new mapboxgl.Popup({offset: 25}).setHTML(
-                        ``
-                    )
-                )
-                .addTo(map.current!);
-
-            markers.current.push(marker);
-        });
-    };
-
-    const removeMarkers = () => {
-        markers.current.forEach((marker) => marker.remove());
-        markers.current = [];
-    };
+        return () => {
+            if (map.current) {
+                map.current.off('moveend', getData);
+            }
+        };
+    }, [getData]);
 
     return (
-        <div style={{height: '90vh'}}>
-            <div ref={mapContainer} style={{height: '100%'}}/>
+        <div style={{ height: '90vh', position: 'relative' }}>
+            <div ref={mapContainer} style={{ height: '100%' }} />
+            <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 1 }}>
+                <button onClick={handleZoomIn}>Zoom In</button>
+                <button onClick={handleZoomOut}>Zoom Out</button>
+            </div>
         </div>
     );
 };
