@@ -3,7 +3,7 @@ export interface Route {
     routeTextColor: string,
     routeShortName: string,
     routeId: string,
-    routeType: number, // 3 -> autobusy, 2 -> pociagi
+    routeType: number,
     routeLongName: string
     stops: Stop[]
     trip: Trip

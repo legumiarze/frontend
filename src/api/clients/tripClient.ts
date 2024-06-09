@@ -1,47 +1,30 @@
 import axiosClient from "./axiosConfig";
-import {Route, Stop, Trip} from "../interfaces/apiModels";
+import { Route, Stop } from "../interfaces/apiModels";
 
-
-const fetchStopsByLocation = async (p: { swLat: number; neLat: number; neLon: number; swLon: number }) => {
+const fetchData = async <T>(endpoint: string, params?: object): Promise<T> => {
     try {
-        const response = await axiosClient.get('/stops', { params: p });
-        return response.data.data;
+        const response = await axiosClient.get(endpoint, { params });
+        return response.data.data || response.data;
     } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error(`Error fetching data from ${endpoint}:`, error);
         throw error;
     }
 };
 
-const fetchRouteInfo = async (id: string): Promise<Route> => {
-    try {
-        const response = await axiosClient.get(`/routes/${id}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        throw error;
-    }
+const fetchStopsByLocation = (p: { swLat: number; neLat: number; neLon: number; swLon: number }) => {
+    return fetchData<Stop[]>('/stops', p);
 };
 
-
-const fetchStopDetailsById = async (id: string): Promise<Stop> => {
-    try {
-        const response = await axiosClient.get(`/stops/${id}`);
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        throw error;
-    }
+const fetchRouteInfo = (id: string) => {
+    return fetchData<Route>(`/routes/${id}`);
 };
 
-const fetchAllRoutes = async (): Promise<Route[]> => {
-    try {
-        const response = await axiosClient.get(`/routes`);
-        return response.data.data;
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        throw error;
-    }
+const fetchStopDetailsById = (id: string) => {
+    return fetchData<Stop>(`/stops/${id}`);
 };
 
+const fetchAllRoutes = () => {
+    return fetchData<Route[]>('/routes');
+};
 
 export { fetchStopsByLocation, fetchStopDetailsById, fetchAllRoutes, fetchRouteInfo };

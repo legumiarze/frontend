@@ -1,12 +1,11 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {Route, Stop, Trip} from "../../api/interfaces/apiModels";
-import {fetchStopDetailsById} from "../../api/clients/tripClient";
+import React, { useCallback, useEffect, useState } from 'react';
+import { Route, Stop } from "../../api/interfaces/apiModels";
+import { fetchStopDetailsById } from "../../api/clients/tripClient";
 import useMap from "../../hooks/useMap";
 import useMarkers from "../../hooks/useMarkers";
-// DO NOT REMOVE, MANDATORY DUE TO MAPBOX PROBLEMS
 import 'mapbox-gl/dist/mapbox-gl.css';
-import {Button} from "@mui/material";
-import {ZoomIn, ZoomOut} from "@mui/icons-material";
+import { Button } from "@mui/material";
+import { ZoomIn, ZoomOut } from "@mui/icons-material";
 import mapboxgl from "mapbox-gl";
 
 interface MapWithImageOverlayProps {
@@ -17,12 +16,9 @@ interface MapWithImageOverlayProps {
     addRoute: Route | null;
 }
 
-const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({onStopAdd,
-                                                                     addRoute,
-                                                                     routeInformation
-                                                                 }) => {
+const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({ onStopAdd, addRoute, routeInformation }) => {
     const [myData, setData] = useState<Stop[]>([]);
-    const {mapContainer, map, isStopFocused, setIsStopFocused, getData} = useMap(setData);
+    const { mapContainer, map, isStopFocused, setIsStopFocused, getData } = useMap(setData);
 
     const markerClick = useCallback(async (stop: Stop) => {
         const result = await fetchStopDetailsById(stop.stopId);
@@ -38,10 +34,9 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({onStopAdd,
         if (!addRoute || !routeInformation) return;
 
         const coordinates = routeInformation.stops.map(stop => [stop.stopLon, stop.stopLat]);
-        if (map.current!.getSource(`route-${routeInformation.trip.tripId}`))
-            return;
+        if (map.current!.getSource(`route-${routeInformation.trip.tripId}`)) return;
 
-        map.current!.addSource(`route-${routeInformation.trip.tripId}}`, {
+        map.current!.addSource(`route-${routeInformation.trip.tripId}`, {
             type: 'geojson',
             data: {
                 type: 'Feature',
@@ -54,9 +49,9 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({onStopAdd,
         });
 
         map.current!.addLayer({
-            id: `route-${routeInformation.trip.tripId}}`,
+            id: `route-${routeInformation.trip.tripId}`,
             type: 'line',
-            source: `route-${routeInformation.trip.tripId}}`,
+            source: `route-${routeInformation.trip.tripId}`,
             layout: {
                 'line-join': 'round',
                 'line-cap': 'round'
@@ -67,15 +62,13 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({onStopAdd,
             }
         });
 
-    }, [addRoute]);
-
+    }, [addRoute, routeInformation, map]);
 
     const drawLines = useCallback((data: Stop[]) => {
         data.forEach((stop) => {
             stop.trips.forEach((trip) => {
                 const coordinates = trip.stops.map(stop => [stop.stopLon, stop.stopLat]);
-                if (map.current!.getSource(`route-${trip.tripId}`))
-                    return;
+                if (map.current!.getSource(`route-${trip.tripId}`)) return;
 
                 map.current!.addSource(`route-${trip.tripId}`, {
                     type: 'geojson',
@@ -160,7 +153,7 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({onStopAdd,
                 map.current!.removeSource(`highlighted-route`);
             }
         }
-    }
+    };
 
     const handleZoomIn = () => {
         if (map.current) {
@@ -184,21 +177,20 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({onStopAdd,
                 map.current.off('moveend', getData);
             }
         };
-    }, [getData]);
+    }, [getData, map]);
 
     return (
-        <div style={{height: '93vh', position: 'relative', width: '100%'}}>
-            <div ref={mapContainer} style={{height: '100%'}}/>
-            <div style={{position: 'absolute', top: '10px', right: '10px', zIndex: 1}}>
+        <div style={{ height: '93vh', position: 'relative', width: '100%' }}>
+            <div ref={mapContainer} style={{ height: '100%' }} />
+            <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1 }}>
                 <Button
-                    startIcon={<ZoomIn/>}
-                    onClick={() => handleZoomIn()}
+                    startIcon={<ZoomIn />}
+                    onClick={handleZoomIn}
                     size={'large'}
                 />
-
                 <Button
-                    startIcon={<ZoomOut/>}
-                    onClick={() => handleZoomOut()}
+                    startIcon={<ZoomOut />}
+                    onClick={handleZoomOut}
                     size={'large'}
                 />
             </div>
