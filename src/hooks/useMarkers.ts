@@ -16,13 +16,12 @@ const useMarkers = (map: mapboxgl.Map | null, data: Stop[], markerClick: (stop: 
         };
 
         const addMarkers = (data: Stop[]) => {
-            console.log(data);
+
             data.forEach((stop) => {
                 const el = document.createElement('div');
                 el.className = 'marker';
 
-                // let icon = (stop.trips[0].route.routeType === 3) ? 'bus' : 'train';
-                let icon = 'autobus';
+                let icon = (stop.locationType === "0") ? 'autobus' : 'train';
 
                 el.style.backgroundImage = `url(/images/${icon}_pin.svg)`;
                 el.style.width = '32px';

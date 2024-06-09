@@ -17,11 +17,8 @@ interface MapWithImageOverlayProps {
     addRoute: Route | null;
 }
 
-const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({
-                                                                     stops,
-                                                                     onStopAdd,
+const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({onStopAdd,
                                                                      addRoute,
-                                                                     hoveredRouteId,
                                                                      routeInformation
                                                                  }) => {
     const [myData, setData] = useState<Stop[]>([]);
@@ -38,7 +35,7 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({
     const markers = useMarkers(map.current, myData, markerClick, isStopFocused);
 
     useEffect(() => {
-        if(!addRoute || !routeInformation) return;
+        if (!addRoute || !routeInformation) return;
 
         const coordinates = routeInformation.stops.map(stop => [stop.stopLon, stop.stopLat]);
         if (map.current!.getSource(`route-${routeInformation.trip.tripId}`))
@@ -80,7 +77,7 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({
                 if (map.current!.getSource(`route-${trip.tripId}`))
                     return;
 
-                map.current!.addSource(`route-${trip.tripId}}`, {
+                map.current!.addSource(`route-${trip.tripId}`, {
                     type: 'geojson',
                     data: {
                         type: 'Feature',
@@ -93,9 +90,9 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({
                 });
 
                 map.current!.addLayer({
-                    id: `route-${trip.tripId}}`,
+                    id: `route-${trip.tripId}`,
                     type: 'line',
-                    source: `route-${trip.tripId}}`,
+                    source: `route-${trip.tripId}`,
                     layout: {
                         'line-join': 'round',
                         'line-cap': 'round'
@@ -116,8 +113,6 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({
 
     const highlightRoute = () => {
         if (routeInformation) {
-            console.log(routeInformation)
-            let trip = routeInformation.trip;
             const coordinates = routeInformation.stops.map(stop => [stop.stopLon, stop.stopLat]);
 
             if (map.current!.getSource(`highlighted-route`)) {

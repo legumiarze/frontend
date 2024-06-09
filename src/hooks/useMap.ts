@@ -21,7 +21,6 @@ const useMap = (setData: (data: Stop[]) => void) => {
                     swLon: mapCoords.getSouthWest().lng
                 });
 
-                console.log(result);
                 setData(result);
             }
         } catch (error) {

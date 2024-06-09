@@ -31,6 +31,14 @@ const Map = () => {
         setRoutes(await fetchAllRoutes());
     };
 
+    const addRouteAndRenderIt = (route : Route | null) => {
+        setAddRoute(route);
+
+        if(route) {
+            setRoutes([...routes, route]);
+        }
+    }
+
     const retrieveRouteInformation = async () => {
         if(!hoveredRouteId) return;
 
@@ -64,8 +72,9 @@ const Map = () => {
             <Container>
                 <CssBaseline/>
                 <RouteSelector
-                    setAddRoute={setAddRoute}
+                    setAddRoute={addRouteAndRenderIt}
                     routes={routes}
+                    setRoutes={setRoutes}
                     onStopAdd={addStop}
                     stops={stops}
                     onRouteHover={setHoveredRouteId}

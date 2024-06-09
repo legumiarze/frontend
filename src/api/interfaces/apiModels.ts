@@ -16,6 +16,7 @@ export interface Stop {
     stopId: string;
     departures: Departure[];
     trips: Trip[];
+    locationType: string;
 }
 
 export interface Trip {

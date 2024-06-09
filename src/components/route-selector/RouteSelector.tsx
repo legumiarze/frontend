@@ -10,37 +10,7 @@ import ActivableButton from "../activable-button/ActivableButton";
 import colores from "../../themes/colores";
 import { RouteButton } from "../route-button/RouteButton";
 import { Route, Stop } from "../../api/interfaces/apiModels";
-
-
-const Sidebar = styled(Box)(({ theme }) => ({
-    width: '40%',
-    height: "93vh",
-    backgroundColor: '#1A237E',
-    padding: theme.spacing(2),
-    color: '#FFFFFF'
-}));
-
-const MobileSidebar = styled(Box)(({ theme }) => ({
-    width: '100%',
-    height: "100vh",
-    backgroundColor: '#1A237E',
-    padding: theme.spacing(2),
-    color: '#FFFFFF'
-}));
-
-const SearchBar = styled(Paper)(({ theme }) => ({
-    padding: theme.spacing(2),
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: theme.spacing(2),
-    backgroundColor: '#FFFFFF',
-}));
-
-const ScrollableList = styled(Box)(({ theme }) => ({
-    overflowY: 'auto',
-    maxHeight: '65vh',
-    paddingRight: "15px"
-}));
+import {MobileSidebar, ScrollableList, SearchBar, Sidebar} from "./components/Styled";
 
 interface RouteSelectorProps {
     routes: Route[];
@@ -48,9 +18,10 @@ interface RouteSelectorProps {
     stops: Stop[];
     onRouteHover: (routeId: string | null) => void;
     setAddRoute: (route: Route | null) => void;
+    setRoutes: (routes: Route[]) => void;
 }
 
-const RouteSelector: React.FC<RouteSelectorProps> = ({ routes, onStopAdd, stops, onRouteHover, setAddRoute }) => {
+const RouteSelector: React.FC<RouteSelectorProps> = ({ routes, onStopAdd, stops, onRouteHover, setAddRoute, setRoutes }) => {
     const theme = useTheme();
     const [isBusState, setBusState] = useState(true);
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -70,12 +41,13 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({ routes, onStopAdd, stops,
 
     const handleRouteClick = (route: Route) => {
         setAddRoute(route);
+        setRoutes([...routes, route]);
     }
 
     const renderList = () => {
         let tmpRoutes = routes;
 
-        if (stops.length > 0) {
+        if (stops.length > 0 && routes.length > 0) {
             let presentRouteIds = stops.flatMap(stop => stop.trips)
                 .flatMap(trip => trip.route)
                 .flatMap(route => route.routeId);
@@ -85,8 +57,6 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({ routes, onStopAdd, stops,
             tmpRoutes = isBusState ? tmpRoutes.filter(route => route.routeType === 3) : tmpRoutes.filter(route => route.routeType === 2);
         }
 
-        let icon = isBusState ? <DirectionsBusIcon style={{ marginRight: theme.spacing(1) }} /> :  <TrainIcon style={{ marginRight: theme.spacing(1) }} />
-
         return <List>
             {tmpRoutes.map((route) =>
                 <RouteButton
@@ -95,7 +65,9 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({ routes, onStopAdd, stops,
                     onMouseLeave={handleMouseLeave}
                     onClick={() => handleRouteClick(route)}
                 >
-                    {icon}
+                    {isBusState ?
+                        <DirectionsBusIcon style={{ marginRight: theme.spacing(1), backgroundColor: route.routeColor, borderRadius: '25%' }} /> :
+                        <TrainIcon style={{ marginRight: theme.spacing(1),  backgroundColor: route.routeColor, borderRadius: '25%' }} />}
                     <ListItemText
                         primary={
                             <Typography textAlign='left'>
@@ -112,7 +84,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({ routes, onStopAdd, stops,
         <Sidebar>
             <SearchBar>
                 <TextField
-                    variant="outlined"
+                    variant='standard'
                     placeholder="Wyszukaj połączenie"
                     fullWidth
                 />
@@ -182,7 +154,6 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({ routes, onStopAdd, stops,
         <MobileSidebar>
             <SearchBar>
                 <TextField
-                    variant="outlined"
                     placeholder="Wyszukaj połączenie"
                     fullWidth
                 />
