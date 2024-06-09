@@ -47,9 +47,10 @@ interface RouteSelectorProps {
     onStopAdd: (stop: Stop) => void;
     stops: Stop[];
     onRouteHover: (routeId: string | null) => void;
+    setAddRoute: (route: Route | null) => void;
 }
 
-const RouteSelector: React.FC<RouteSelectorProps> = ({ routes, onStopAdd, stops, onRouteHover }) => {
+const RouteSelector: React.FC<RouteSelectorProps> = ({ routes, onStopAdd, stops, onRouteHover, setAddRoute }) => {
     const theme = useTheme();
     const [isBusState, setBusState] = useState(true);
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -66,6 +67,10 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({ routes, onStopAdd, stops,
     const handleMouseLeave = () => {
         onRouteHover(null);
     };
+
+    const handleRouteClick = (route: Route) => {
+        setAddRoute(route);
+    }
 
     const renderList = () => {
         let tmpRoutes = routes;
@@ -88,6 +93,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({ routes, onStopAdd, stops,
                     key={route.routeId}
                     onMouseEnter={() => handleMouseEnter(route.routeId)}
                     onMouseLeave={handleMouseLeave}
+                    onClick={() => handleRouteClick(route)}
                 >
                     {icon}
                     <ListItemText

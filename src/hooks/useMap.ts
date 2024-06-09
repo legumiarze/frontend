@@ -20,6 +20,8 @@ const useMap = (setData: (data: Stop[]) => void) => {
                     swLat: mapCoords.getSouthWest().lat,
                     swLon: mapCoords.getSouthWest().lng
                 });
+
+                console.log(result);
                 setData(result);
             }
         } catch (error) {
@@ -40,14 +42,14 @@ const useMap = (setData: (data: Stop[]) => void) => {
         map.current.on('load', () => {
             map.current!.on('moveend', () => {
                 const zoomLevel = map.current!.getZoom();
-                const zoomThreshold = 15;
+                const zoomThreshold = 13;
 
                 if (!isStopFocused && zoomLevel >= zoomThreshold) {
                     getData();
                 }
             });
         });
-    }, [isStopFocused]);
+    }, [isStopFocused, ]);
 
     return { mapContainer, map, isStopFocused, setIsStopFocused, getData };
 };

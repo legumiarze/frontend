@@ -25,6 +25,7 @@ const Map = () => {
     const [stops, setStops] = useState<Stop[]>([]);
     const [routeInformation, setRouteInformation] = useState<Route | null>(null);
     const [hoveredRouteId, setHoveredRouteId] = useState<string | null>(null);
+    const [addRoute, setAddRoute] = useState<Route | null>(null);
 
     const fetchRoutes = async () => {
         setRoutes(await fetchAllRoutes());
@@ -63,6 +64,7 @@ const Map = () => {
             <Container>
                 <CssBaseline/>
                 <RouteSelector
+                    setAddRoute={setAddRoute}
                     routes={routes}
                     onStopAdd={addStop}
                     stops={stops}
@@ -89,6 +91,7 @@ const Map = () => {
                         routeInformation={routeInformation}
                         stops={stops}
                         onStopAdd={addStop}
+                        addRoute={addRoute}
                         hoveredRouteId={hoveredRouteId} />
                 </Content>
             </Container>

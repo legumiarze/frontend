@@ -1,6 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
 import mapboxgl from 'mapbox-gl';
 import {Stop} from "../api/interfaces/apiModels";
+// DO NOT REMOVE, MANDATORY DUE TO MAPBOX PROBLEMS
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 const useMarkers = (map: mapboxgl.Map | null, data: Stop[], markerClick: (stop: Stop) => void, isStopFocused: boolean) => {
     const markers = useRef<mapboxgl.Marker[]>([]);
@@ -22,7 +24,7 @@ const useMarkers = (map: mapboxgl.Map | null, data: Stop[], markerClick: (stop: 
                 // let icon = (stop.trips[0].route.routeType === 3) ? 'bus' : 'train';
                 let icon = 'autobus';
 
-                el.style.backgroundImage = `url(/images/${icon}_pin.png)`;
+                el.style.backgroundImage = `url(/images/${icon}_pin.svg)`;
                 el.style.width = '32px';
                 el.style.height = '32px';
                 el.style.backgroundSize = '100%';
@@ -39,7 +41,7 @@ const useMarkers = (map: mapboxgl.Map | null, data: Stop[], markerClick: (stop: 
                 })
                 markerDiv.addEventListener('mouseleave', () => marker.togglePopup())
 
-               marker
+                marker
                     .setLngLat([stop.stopLon, stop.stopLat])
                     .addTo(map);
 
@@ -48,7 +50,7 @@ const useMarkers = (map: mapboxgl.Map | null, data: Stop[], markerClick: (stop: 
         };
 
 
-        if (map.getZoom() > 12) {
+        if (map.getZoom() > 13) {
             removeMarkers();
             addMarkers(data);
         }
@@ -59,7 +61,6 @@ const useMarkers = (map: mapboxgl.Map | null, data: Stop[], markerClick: (stop: 
 
     return markers;
 };
-
 
 
 export default useMarkers;

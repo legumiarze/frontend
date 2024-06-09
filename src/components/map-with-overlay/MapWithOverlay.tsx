@@ -7,17 +7,20 @@ import useMarkers from "../../hooks/useMarkers";
 import 'mapbox-gl/dist/mapbox-gl.css';
 import {Button} from "@mui/material";
 import {ZoomIn, ZoomOut} from "@mui/icons-material";
+import mapboxgl from "mapbox-gl";
 
 interface MapWithImageOverlayProps {
     stops: Stop[];
     onStopAdd: (stop: Stop) => void;
     hoveredRouteId: string | null;
     routeInformation: Route | null;
+    addRoute: Route | null;
 }
 
 const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({
                                                                      stops,
                                                                      onStopAdd,
+                                                                     addRoute,
                                                                      hoveredRouteId,
                                                                      routeInformation
                                                                  }) => {
@@ -34,50 +37,75 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({
 
     const markers = useMarkers(map.current, myData, markerClick, isStopFocused);
 
+    useEffect(() => {
+        if(!addRoute || !routeInformation) return;
+
+        const coordinates = routeInformation.stops.map(stop => [stop.stopLon, stop.stopLat]);
+        if (map.current!.getSource(`route-${routeInformation.trip.tripId}`))
+            return;
+
+        map.current!.addSource(`route-${routeInformation.trip.tripId}}`, {
+            type: 'geojson',
+            data: {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                    type: 'LineString',
+                    coordinates: coordinates
+                }
+            }
+        });
+
+        map.current!.addLayer({
+            id: `route-${routeInformation.trip.tripId}}`,
+            type: 'line',
+            source: `route-${routeInformation.trip.tripId}}`,
+            layout: {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            paint: {
+                'line-color': `#${routeInformation.routeColor}`,
+                'line-width': 4
+            }
+        });
+
+    }, [addRoute]);
+
+
     const drawLines = useCallback((data: Stop[]) => {
         data.forEach((stop) => {
             stop.trips.forEach((trip) => {
                 const coordinates = trip.stops.map(stop => [stop.stopLon, stop.stopLat]);
+                if (map.current!.getSource(`route-${trip.tripId}`))
+                    return;
 
-                if (map.current!.getSource(`route-${trip.tripId}}`)) {
-                    const source = map.current!.getSource(`route-${trip.tripId}}`);
-                    if ((source as mapboxgl.GeoJSONSource).setData) {
-                        (source as mapboxgl.GeoJSONSource).setData({
-                            type: 'Feature',
-                            properties: {},
-                            geometry: {
-                                type: 'LineString',
-                                coordinates: coordinates
-                            }
-                        });
+                map.current!.addSource(`route-${trip.tripId}}`, {
+                    type: 'geojson',
+                    data: {
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: coordinates
+                        }
                     }
-                } else {
-                    map.current!.addSource(`route-${trip.tripId}}`, {
-                        type: 'geojson',
-                        data: {
-                            type: 'Feature',
-                            properties: {},
-                            geometry: {
-                                type: 'LineString',
-                                coordinates: coordinates
-                            }
-                        }
-                    });
+                });
 
-                    map.current!.addLayer({
-                        id: `route-${trip.tripId}}`,
-                        type: 'line',
-                        source: `route-${trip.tripId}}`,
-                        layout: {
-                            'line-join': 'round',
-                            'line-cap': 'round'
-                        },
-                        paint: {
-                            'line-color': `#${trip.route.routeColor}`,
-                            'line-width': 4
-                        }
-                    });
-                }
+                map.current!.addLayer({
+                    id: `route-${trip.tripId}}`,
+                    type: 'line',
+                    source: `route-${trip.tripId}}`,
+                    layout: {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    paint: {
+                        'line-color': `#${trip.route.routeColor}`,
+                        'line-width': 4
+                    }
+                });
+
             });
         });
     }, [map]);
