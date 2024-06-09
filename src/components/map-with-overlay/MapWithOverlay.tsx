@@ -187,7 +187,7 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({onStopAdd,
     }, [getData]);
 
     return (
-        <div style={{height: '90vh', position: 'relative'}}>
+        <div style={{height: '93vh', position: 'relative', width: '100%'}}>
             <div ref={mapContainer} style={{height: '100%'}}/>
             <div style={{position: 'absolute', top: '10px', right: '10px', zIndex: 1}}>
                 <Button

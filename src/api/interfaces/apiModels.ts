@@ -7,6 +7,7 @@ export interface Route {
     routeLongName: string
     stops: Stop[]
     trip: Trip
+    isSelected: boolean
 }
 
 export interface Stop {

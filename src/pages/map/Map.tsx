@@ -81,21 +81,6 @@ const Map = () => {
                 />
 
                 <Content>
-                    {isMobile ? (<Button
-                        variant="contained"
-                        color="primary"
-                        onClick={toggleDrawer}
-                        sx={{
-                            position: 'fixed',
-                            top: '50%',
-                            left: drawerOpen ? `calc(58% + 16px)` : '16px',
-                            transform: 'translateY(-50%)',
-                            zIndex: 1300,
-                        }}
-                    >
-                        {drawerOpen ? '<' : '>'}
-                    </Button>) : <></>}
-
                     <MapWithImageOverlay
                         routeInformation={routeInformation}
                         stops={stops}
