@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import mapboxgl from 'mapbox-gl';
 import {Stop} from "../api/interfaces/apiModels";
 
@@ -14,24 +14,38 @@ const useMarkers = (map: mapboxgl.Map | null, data: Stop[], markerClick: (stop: 
         };
 
         const addMarkers = (data: Stop[]) => {
+            console.log(data);
             data.forEach((stop) => {
                 const el = document.createElement('div');
                 el.className = 'marker';
 
-                el.style.backgroundImage = 'url(/images/tmp-icon.png)';
+                // let icon = (stop.trips[0].route.routeType === 3) ? 'bus' : 'train';
+                let icon = 'autobus';
+
+                el.style.backgroundImage = `url(/images/${icon}_pin.png)`;
                 el.style.width = '32px';
                 el.style.height = '32px';
                 el.style.backgroundSize = '100%';
+
+                const marker = new mapboxgl.Marker(el);
+
                 el.addEventListener('click', () => markerClick(stop));
 
-                const marker = new mapboxgl.Marker(el)
+                const popup = new mapboxgl.Popup().setHTML('<h3>' + stop.stopName + '</h3>')
+                const markerDiv = marker.getElement()
+                markerDiv.addEventListener('mouseenter', () => {
+                    marker.setPopup(popup)
+                    marker.togglePopup()
+                })
+                markerDiv.addEventListener('mouseleave', () => marker.togglePopup())
+
+               marker
                     .setLngLat([stop.stopLon, stop.stopLat])
                     .addTo(map);
 
                 markers.current.push(marker);
             });
         };
-
 
 
         if (map.getZoom() > 12) {
@@ -45,5 +59,7 @@ const useMarkers = (map: mapboxgl.Map | null, data: Stop[], markerClick: (stop: 
 
     return markers;
 };
+
+
 
 export default useMarkers;

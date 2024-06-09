@@ -1,7 +1,7 @@
 import RouteSelector from "../../components/route-selector/RouteSelector";
 import React, {useEffect, useState} from "react";
-import {fetchAllRoutes, fetchStopsByLocation} from "../../api/clients/tripClient";
-import {Route, Stop} from "../../api/interfaces/apiModels";
+import {fetchAllRoutes, fetchRouteInfo} from "../../api/clients/tripClient";
+import {Route, Stop, Trip} from "../../api/interfaces/apiModels";
 import {styled} from "@mui/material/styles";
 import {Box, Button, CssBaseline, useMediaQuery} from "@mui/material";
 import MapWithImageOverlay from "../../components/map-with-overlay/MapWithOverlay";
@@ -23,9 +23,17 @@ const Map = () => {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [routes, setRoutes] = useState<Route[]>([]);
     const [stops, setStops] = useState<Stop[]>([]);
+    const [routeInformation, setRouteInformation] = useState<Route | null>(null);
+    const [hoveredRouteId, setHoveredRouteId] = useState<string | null>(null);
 
-    const fetchRoutes = async ()=> {
+    const fetchRoutes = async () => {
         setRoutes(await fetchAllRoutes());
+    };
+
+    const retrieveRouteInformation = async () => {
+        if(!hoveredRouteId) return;
+
+        setRouteInformation(await fetchRouteInfo(hoveredRouteId));
     };
 
     const addStop = (stop: Stop) => {
@@ -37,21 +45,30 @@ const Map = () => {
     }, []);
 
     useEffect(() => {
-    }, [stops]);
+        if(!hoveredRouteId) {
+            setRouteInformation(null);
+            return;
+        }
 
-
+        retrieveRouteInformation();
+    }, [hoveredRouteId]);
 
     const toggleDrawer = () => {
         setDrawerOpen(!drawerOpen);
     };
 
 
-
     return (
         <div>
             <Container>
                 <CssBaseline/>
-                <RouteSelector routes={routes} onStopAdd={addStop} stops={stops}/>
+                <RouteSelector
+                    routes={routes}
+                    onStopAdd={addStop}
+                    stops={stops}
+                    onRouteHover={setHoveredRouteId}
+                />
+
                 <Content>
                     {isMobile ? (<Button
                         variant="contained"
@@ -68,7 +85,11 @@ const Map = () => {
                         {drawerOpen ? '<' : '>'}
                     </Button>) : <></>}
 
-                    <MapWithImageOverlay stops={stops} onStopAdd={addStop}/>
+                    <MapWithImageOverlay
+                        routeInformation={routeInformation}
+                        stops={stops}
+                        onStopAdd={addStop}
+                        hoveredRouteId={hoveredRouteId} />
                 </Content>
             </Container>
         </div>

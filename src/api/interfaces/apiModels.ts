@@ -5,6 +5,8 @@ export interface Route {
     routeId: string,
     routeType: number, // 3 -> autobusy, 2 -> pociagi
     routeLongName: string
+    stops: Stop[]
+    trip: Trip
 }
 
 export interface Stop {

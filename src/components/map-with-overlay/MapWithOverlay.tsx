@@ -1,18 +1,28 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import {Stop} from "../../api/interfaces/apiModels";
+import {Route, Stop, Trip} from "../../api/interfaces/apiModels";
 import {fetchStopDetailsById} from "../../api/clients/tripClient";
 import useMap from "../../hooks/useMap";
 import useMarkers from "../../hooks/useMarkers";
+// DO NOT REMOVE, MANDATORY DUE TO MAPBOX PROBLEMS
 import 'mapbox-gl/dist/mapbox-gl.css';
+import {Button} from "@mui/material";
+import {ZoomIn, ZoomOut} from "@mui/icons-material";
 
 interface MapWithImageOverlayProps {
     stops: Stop[];
     onStopAdd: (stop: Stop) => void;
+    hoveredRouteId: string | null;
+    routeInformation: Route | null;
 }
 
-const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({ stops, onStopAdd }) => {
+const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({
+                                                                     stops,
+                                                                     onStopAdd,
+                                                                     hoveredRouteId,
+                                                                     routeInformation
+                                                                 }) => {
     const [myData, setData] = useState<Stop[]>([]);
-    const { mapContainer, map, isStopFocused, setIsStopFocused, getData } = useMap(setData);
+    const {mapContainer, map, isStopFocused, setIsStopFocused, getData} = useMap(setData);
 
     const markerClick = useCallback(async (stop: Stop) => {
         const result = await fetchStopDetailsById(stop.stopId);
@@ -26,14 +36,11 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({ stops, onStop
 
     const drawLines = useCallback((data: Stop[]) => {
         data.forEach((stop) => {
-            stop.trips.forEach((trip, index) => {
+            stop.trips.forEach((trip) => {
                 const coordinates = trip.stops.map(stop => [stop.stopLon, stop.stopLat]);
 
-            if(map.current!.getSource(`route-${trip.tripId}`))
-                return;
-
-                if (map.current!.getSource(`route-${trip.tripId}`)) {
-                    const source = map.current!.getSource(`route-${trip.tripId}`);
+                if (map.current!.getSource(`route-${trip.tripId}}`)) {
+                    const source = map.current!.getSource(`route-${trip.tripId}}`);
                     if ((source as mapboxgl.GeoJSONSource).setData) {
                         (source as mapboxgl.GeoJSONSource).setData({
                             type: 'Feature',
@@ -45,7 +52,7 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({ stops, onStop
                         });
                     }
                 } else {
-                    map.current!.addSource(`route-${trip.tripId}`, {
+                    map.current!.addSource(`route-${trip.tripId}}`, {
                         type: 'geojson',
                         data: {
                             type: 'Feature',
@@ -58,9 +65,9 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({ stops, onStop
                     });
 
                     map.current!.addLayer({
-                        id: `route-${trip.tripId}`,
+                        id: `route-${trip.tripId}}`,
                         type: 'line',
-                        source: `route-${trip.tripId}`,
+                        source: `route-${trip.tripId}}`,
                         layout: {
                             'line-join': 'round',
                             'line-cap': 'round'
@@ -75,6 +82,63 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({ stops, onStop
         });
     }, [map]);
 
+    useEffect(() => {
+        highlightRoute();
+    }, [routeInformation]);
+
+    const highlightRoute = () => {
+        if (routeInformation) {
+            console.log(routeInformation)
+            let trip = routeInformation.trip;
+            const coordinates = routeInformation.stops.map(stop => [stop.stopLon, stop.stopLat]);
+
+            if (map.current!.getSource(`highlighted-route`)) {
+                const source = map.current!.getSource(`highlighted-route`);
+                if ((source as mapboxgl.GeoJSONSource).setData) {
+                    (source as mapboxgl.GeoJSONSource).setData({
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: coordinates
+                        }
+                    });
+                }
+            } else {
+                map.current!.addSource(`highlighted-route`, {
+                    type: 'geojson',
+                    data: {
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: coordinates
+                        }
+                    }
+                });
+
+                map.current!.addLayer({
+                    id: `highlighted-route`,
+                    type: 'line',
+                    source: `highlighted-route`,
+                    layout: {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    paint: {
+                        'line-color': `#${routeInformation.routeColor}`,
+                        'line-width': 6
+                    }
+                });
+            }
+        } else {
+            if (map.current!.getSource(`highlighted-route`)) {
+                map.current!.removeLayer(`highlighted-route`);
+                map.current!.removeSource(`highlighted-route`);
+            }
+        }
+    }
+
     const handleZoomIn = () => {
         if (map.current) {
             map.current.zoomIn();
@@ -85,12 +149,6 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({ stops, onStop
         if (map.current) {
             map.current.zoomOut();
         }
-    };
-
-    const toggleMarkers = () => {
-        markers.current.forEach(marker => {
-            marker.getElement().style.visibility = marker.getElement().style.visibility === 'visible' ? 'hidden' : 'visible';
-        });
     };
 
     useEffect(() => {
@@ -106,11 +164,20 @@ const MapWithImageOverlay: React.FC<MapWithImageOverlayProps> = ({ stops, onStop
     }, [getData]);
 
     return (
-        <div style={{ height: '90vh', position: 'relative' }}>
-            <div ref={mapContainer} style={{ height: '100%' }} />
-            <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 1 }}>
-                <button onClick={handleZoomIn}>Zoom In</button>
-                <button onClick={handleZoomOut}>Zoom Out</button>
+        <div style={{height: '90vh', position: 'relative'}}>
+            <div ref={mapContainer} style={{height: '100%'}}/>
+            <div style={{position: 'absolute', top: '10px', right: '10px', zIndex: 1}}>
+                <Button
+                    startIcon={<ZoomIn/>}
+                    onClick={() => handleZoomIn()}
+                    size={'large'}
+                />
+
+                <Button
+                    startIcon={<ZoomOut/>}
+                    onClick={() => handleZoomOut()}
+                    size={'large'}
+                />
             </div>
         </div>
     );

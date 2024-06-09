@@ -1,19 +1,18 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemText,
     CssBaseline, useMediaQuery, Button, TextField, Box, Paper, Drawer
 } from '@mui/material';
-import {useTheme, styled} from '@mui/material/styles';
+import { useTheme, styled } from '@mui/material/styles';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import TrainIcon from '@mui/icons-material/Train';
-import MapWithImageOverlay from "../map-with-overlay/MapWithOverlay";
 import ActivableButton from "../activable-button/ActivableButton";
 import colores from "../../themes/colores";
-import {RouteButton} from "../route-button/RouteButton";
-import {Route, Stop} from "../../api/interfaces/apiModels";
+import { RouteButton } from "../route-button/RouteButton";
+import { Route, Stop } from "../../api/interfaces/apiModels";
 
 
-const Sidebar = styled(Box)(({theme}) => ({
+const Sidebar = styled(Box)(({ theme }) => ({
     width: '40%',
     height: "93vh",
     backgroundColor: '#1A237E',
@@ -21,7 +20,7 @@ const Sidebar = styled(Box)(({theme}) => ({
     color: '#FFFFFF'
 }));
 
-const MobileSidebar = styled(Box)(({theme}) => ({
+const MobileSidebar = styled(Box)(({ theme }) => ({
     width: '100%',
     height: "100vh",
     backgroundColor: '#1A237E',
@@ -29,7 +28,7 @@ const MobileSidebar = styled(Box)(({theme}) => ({
     color: '#FFFFFF'
 }));
 
-const SearchBar = styled(Paper)(({theme}) => ({
+const SearchBar = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(2),
     display: 'flex',
     alignItems: 'center',
@@ -37,7 +36,7 @@ const SearchBar = styled(Paper)(({theme}) => ({
     backgroundColor: '#FFFFFF',
 }));
 
-const ScrollableList = styled(Box)(({theme}) => ({
+const ScrollableList = styled(Box)(({ theme }) => ({
     overflowY: 'auto',
     maxHeight: '65vh',
     paddingRight: "15px"
@@ -47,17 +46,25 @@ interface RouteSelectorProps {
     routes: Route[];
     onStopAdd: (stop: Stop) => void;
     stops: Stop[];
+    onRouteHover: (routeId: string | null) => void;
 }
 
-const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops}) => {
+const RouteSelector: React.FC<RouteSelectorProps> = ({ routes, onStopAdd, stops, onRouteHover }) => {
     const theme = useTheme();
     const [isBusState, setBusState] = useState(true);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-
     const toggleDrawer = () => {
         setDrawerOpen(!drawerOpen);
+    };
+
+    const handleMouseEnter = (routeId: string) => {
+        onRouteHover(routeId);
+    };
+
+    const handleMouseLeave = () => {
+        onRouteHover(null);
     };
 
     const renderList = () => {
@@ -69,12 +76,20 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
                 .flatMap(route => route.routeId);
 
             tmpRoutes = routes.filter(route => presentRouteIds.some(routeId => routeId === route.routeId));
+        } else {
+            tmpRoutes = isBusState ? tmpRoutes.filter(route => route.routeType === 3) : tmpRoutes.filter(route => route.routeType === 2);
         }
+
+        let icon = isBusState ? <DirectionsBusIcon style={{ marginRight: theme.spacing(1) }} /> :  <TrainIcon style={{ marginRight: theme.spacing(1) }} />
 
         return <List>
             {tmpRoutes.map((route) =>
-                <RouteButton key={route.routeId}>
-                    <DirectionsBusIcon style={{marginRight: theme.spacing(1)}}/>
+                <RouteButton
+                    key={route.routeId}
+                    onMouseEnter={() => handleMouseEnter(route.routeId)}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    {icon}
                     <ListItemText
                         primary={
                             <Typography textAlign='left'>
@@ -85,7 +100,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
                 </RouteButton>)
             }
         </List>
-    }
+    };
 
     const sidebarContent = (
         <Sidebar>
@@ -101,7 +116,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
                      justifyContent="space-between"
                      mb={2}
                      sx={{
-                         '&:hover': {bgcolor: colores.shadowedActiveBg}
+                         '&:hover': { bgcolor: colores.shadowedActiveBg }
                      }}
                 >
                     {isBusState ? (
@@ -111,7 +126,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
                                 color="primary"
                                 text="Autobusy"
                                 bgcolor='white'
-                                icon={<DirectionsBusIcon/>}
+                                icon={<DirectionsBusIcon />}
                                 hoverBgcolor='white'
                                 hoverTextColor='primary'
                                 click={() => setBusState(true)}
@@ -121,7 +136,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
                                 color="primary"
                                 text="Pociągi"
                                 bgcolor={colores.primaryBgColor}
-                                icon={<TrainIcon/>}
+                                icon={<TrainIcon />}
                                 hoverBgcolor='white'
                                 hoverTextColor={colores.primaryBgColor}
                                 click={() => setBusState(false)}
@@ -133,7 +148,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
                             color="primary"
                             text="Autobusy"
                             bgcolor={colores.primaryBgColor}
-                            icon={<DirectionsBusIcon/>}
+                            icon={<DirectionsBusIcon />}
                             hoverBgcolor='white'
                             hoverTextColor={colores.primaryBgColor}
                             click={() => setBusState(true)}
@@ -143,7 +158,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
                             color="primary"
                             text="Pociągi"
                             bgcolor='white'
-                            icon={<TrainIcon/>}
+                            icon={<TrainIcon />}
                             hoverBgcolor='white'
                             hoverTextColor='primary'
                             click={() => setBusState(false)}
@@ -170,7 +185,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
                  justifyContent="space-between"
                  mb={2}
                  sx={{
-                     '&:hover': {bgcolor: colores.shadowedActiveBg}
+                     '&:hover': { bgcolor: colores.shadowedActiveBg }
                  }}
             >
                 {isBusState ? (
@@ -180,7 +195,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
                             color="primary"
                             text="Autobusy"
                             bgcolor='white'
-                            icon={<DirectionsBusIcon/>}
+                            icon={<DirectionsBusIcon />}
                             hoverBgcolor='white'
                             hoverTextColor='primary'
                             click={() => setBusState(true)}
@@ -190,7 +205,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
                             color="primary"
                             text="Pociągi"
                             bgcolor={colores.primaryBgColor}
-                            icon={<TrainIcon/>}
+                            icon={<TrainIcon />}
                             hoverBgcolor='white'
                             hoverTextColor={colores.primaryBgColor}
                             click={() => setBusState(false)}
@@ -202,7 +217,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
                         color="primary"
                         text="Autobusy"
                         bgcolor={colores.primaryBgColor}
-                        icon={<DirectionsBusIcon/>}
+                        icon={<DirectionsBusIcon />}
                         hoverBgcolor='white'
                         hoverTextColor={colores.primaryBgColor}
                         click={() => setBusState(true)}
@@ -212,7 +227,7 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
                         color="primary"
                         text="Pociągi"
                         bgcolor='white'
-                        icon={<TrainIcon/>}
+                        icon={<TrainIcon />}
                         hoverBgcolor='white'
                         hoverTextColor='primary'
                         click={() => setBusState(false)}
@@ -223,8 +238,12 @@ const RouteSelector: React.FC<RouteSelectorProps> = ({routes, onStopAdd, stops})
             <ScrollableList>
                 <List>
                     {routes.map((route) =>
-                        <RouteButton key={route.routeId}>
-                            <DirectionsBusIcon style={{marginRight: theme.spacing(1)}}/>
+                        <RouteButton
+                            key={route.routeId}
+                            onMouseEnter={() => handleMouseEnter(route.routeId)}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                            <DirectionsBusIcon style={{ marginRight: theme.spacing(1) }} />
                             <ListItemText
                                 primary={
                                     <Typography textAlign='left'>

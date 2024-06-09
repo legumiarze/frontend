@@ -1,5 +1,5 @@
 import axiosClient from "./axiosConfig";
-import {Route, Stop} from "../interfaces/apiModels";
+import {Route, Stop, Trip} from "../interfaces/apiModels";
 
 
 const fetchStopsByLocation = async (p: { swLat: number; neLat: number; neLon: number; swLon: number }) => {
@@ -11,6 +11,17 @@ const fetchStopsByLocation = async (p: { swLat: number; neLat: number; neLon: nu
         throw error;
     }
 };
+
+const fetchRouteInfo = async (id: string): Promise<Route> => {
+    try {
+        const response = await axiosClient.get(`/routes/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        throw error;
+    }
+};
+
 
 const fetchStopDetailsById = async (id: string): Promise<Stop> => {
     try {
@@ -33,4 +44,4 @@ const fetchAllRoutes = async (): Promise<Route[]> => {
 };
 
 
-export { fetchStopsByLocation, fetchStopDetailsById, fetchAllRoutes };
+export { fetchStopsByLocation, fetchStopDetailsById, fetchAllRoutes, fetchRouteInfo };
