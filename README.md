@@ -32,6 +32,7 @@ we focused on real life scenarios.
     - Flexible management selected pins
     - Adjusted pins for means of transport as well as trips
     - Possibility to create one big interactive map of all trips and stops in Malopolska 
+    - Live trip highlight and fast search with optimized rendering
   
 Prerequisites
 -------------
